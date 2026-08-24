@@ -39,7 +39,7 @@ import {
   type Workout,
   type WorkoutType,
 } from "./types";
-type Page = "calendar" | "add" | "runs" | "settings" | "week";
+type Page = "calendar" | "add" | "runs" | "functional" | "settings" | "week";
 const Icon = ({ type }: { type: WorkoutType }) =>
   type === "run" ? (
     <Footprints />
@@ -108,6 +108,7 @@ export default function App() {
         {page === "runs" && (
           <RunsPage items={items} onEdit={(w) => go("add")} />
         )}{" "}
+        {page === "functional" && <FunctionalPage items={items} />}
         {page === "settings" && <SettingsPage onSave={notify} />}{" "}
         {page !== "week" && <Nav page={page} go={go} />}{" "}
         {toast && (
@@ -122,8 +123,8 @@ export default function App() {
 function Nav({ page, go }: { page: Page; go: (p: Page) => void }) {
   const links = [
     { id: "calendar" as Page, Icon: CalendarDays, label: "Календарь" },
-    { id: "add" as Page, Icon: Plus, label: "Добавить" },
     { id: "runs" as Page, Icon: Footprints, label: "Бег" },
+    { id: "functional" as Page, Icon: Dumbbell, label: "Функц.-силовые" },
     { id: "settings" as Page, Icon: Settings, label: "Настройки" },
   ];
   return (
@@ -162,6 +163,7 @@ function CalendarPage({
     <>
       <header>
         <h1>Календарь</h1>
+        <button className="round" aria-label="Добавить тренировку" onClick={onAdd}><Plus /></button>
       </header>
       <section className="month-switch">
         <button
@@ -647,6 +649,11 @@ function RunsPage({
       ))}
     </>
   );
+}
+function FunctionalPage({ items }: { items: Workout[] }) {
+  const [opened, setOpened] = useState<string | null>(null);
+  const workouts = items.filter((w) => w.type === "functional_strength" || w.type === "strength");
+  return <><header><h1>Функционально-силовые</h1></header><h2 className="section-title">Все тренировки</h2>{workouts.length ? workouts.map((workout) => <button className="workout" key={workout.id} onClick={() => setOpened(opened === workout.id ? null : workout.id)}><span className="type-icon"><Dumbbell /></span><div><b>{workout.strengthFocus === "upper" ? "Верх" : workout.strengthFocus === "lower" ? "Низ" : "Тренировка"}</b><small>{displayDate(workout.date)}</small>{opened === workout.id && <small>{workout.notes || "Программа не указана"}</small>}</div></button>) : <p className="empty">Здесь появятся функционально-силовые тренировки.</p>}</>;
 }
 function SettingsPage({ onSave }: { onSave: (x: string) => void }) {
   const [date, setDate] = useState(weekStart(today())),
