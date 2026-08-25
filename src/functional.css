@@ -1,0 +1,30 @@
+.functional-list {
+  display: grid;
+  gap: 12px;
+}
+
+.functional-card {
+  width: 100%;
+  min-height: 88px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.functional-card-content {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 5px;
+}
+
+.functional-card-content > b { font-size: 16px; line-height: 1.4; }
+.functional-preview, .functional-program { font-size: 14px; line-height: 1.4; }
+.functional-preview { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.functional-card.opened .functional-preview { display: none; }
+.functional-program { white-space: pre-wrap; color: var(--text); }
