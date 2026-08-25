@@ -16,6 +16,13 @@ export const parsePace = (value: string) => {
   if (!m || +m[2] > 59) return null;
   return +m[1] * 60 + +m[2];
 };
+export const parseDuration = (value: string) => {
+  const normalized = value.trim();
+  if (/^\d+$/.test(normalized)) return +normalized;
+  const m = normalized.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m || +m[2] > 59) return null;
+  return +m[1] * 60 + +m[2];
+};
 export const pace = (seconds?: number) =>
   seconds === undefined
     ? "—"
