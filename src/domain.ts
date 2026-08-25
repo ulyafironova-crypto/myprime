@@ -57,7 +57,7 @@ export function progress(
     Math.min(counts.strength, goals.strength) +
     Math.min(counts.functionalStrength, goals.functionalStrength);
   const percent = total ? Math.min(100, (completed / total) * 100) : 100;
-  const status = isCurrent
+  const status = isCurrent && percent < 100
     ? "В процессе"
     : percent === 100
       ? "Идеальная"
