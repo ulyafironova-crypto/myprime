@@ -650,8 +650,55 @@ function RunsPage({
 }
 function FunctionalPage({ items }: { items: Workout[] }) {
   const [opened, setOpened] = useState<string | null>(null);
-  const workouts = items.filter((w) => w.type === "functional_strength" || w.type === "strength");
-  return <><header><h1>Функционально-силовые</h1></header><h2 className="section-title">Все тренировки</h2>{workouts.length ? workouts.map((workout) => <button className="workout" key={workout.id} onClick={() => setOpened(opened === workout.id ? null : workout.id)}><span className="type-icon"><Dumbbell /></span><div><b>{workout.strengthFocus === "upper" ? "Верх" : workout.strengthFocus === "lower" ? "Низ" : "Тренировка"}</b><small>{displayDate(workout.date)}</small>{opened === workout.id && <small>{workout.notes || "Программа не указана"}</small>}</div></button>) : <p className="empty">Здесь появятся функционально-силовые тренировки.</p>}</>;
+  const workouts = items.filter(
+    (w) => w.type === "functional_strength" || w.type === "strength",
+  );
+  return (
+    <>
+      <header>
+        <h1>Функционально-силовые</h1>
+      </header>
+      <h2 className="section-title">Все тренировки</h2>
+      {workouts.length ? (
+        <section className="functional-list" aria-label="Список тренировок">
+          {workouts.map((workout) => {
+            const isOpened = opened === workout.id;
+            const focus =
+              workout.strengthFocus === "upper"
+                ? "Верх"
+                : workout.strengthFocus === "lower"
+                  ? "Низ"
+                  : "Функционально-силовая";
+            return (
+              <button
+                className={`functional-card ${isOpened ? "opened" : ""}`}
+                key={workout.id}
+                aria-expanded={isOpened}
+                onClick={() => setOpened(isOpened ? null : workout.id)}
+              >
+                <span className="type-icon">
+                  <Dumbbell />
+                </span>
+                <span className="functional-card-content">
+                  <b>{displayDate(workout.date)}</b>
+                  <small className="functional-preview">
+                    {workout.notes || `${focus} · программа не указана`}
+                  </small>
+                  {isOpened && (
+                    <small className="functional-program">
+                      {workout.notes || "Программа не указана"}
+                    </small>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+        </section>
+      ) : (
+        <p className="empty">Здесь появятся функционально-силовые тренировки.</p>
+      )}
+    </>
+  );
 }
 function SettingsPage({ onSave }: { onSave: (x: string) => void }) {
   const [date, setDate] = useState(weekStart(today())),
