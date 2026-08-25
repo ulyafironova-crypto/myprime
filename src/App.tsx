@@ -179,6 +179,18 @@ function CalendarPage({
   const first = new Date(`${month}T12:00:00`),
     start = weekStart(month),
     weeks = Array.from({ length: 6 }, (_, i) => addDays(start, i * 7));
+  const [goalsByWeek, setGoalsByWeek] = useState<Record<string, GoalVersion["goals"]>>({});
+  useEffect(() => {
+    let active = true;
+    Promise.all(
+      weeks.map(async (week) => [week, (await getGoal(week)) || defaultGoals] as const),
+    ).then((entries) => {
+      if (active) setGoalsByWeek(Object.fromEntries(entries));
+    });
+    return () => {
+      active = false;
+    };
+  }, [month]);
   const current = weekStart(today());
   return (
     <>
@@ -215,7 +227,7 @@ function CalendarPage({
         </div>
         {weeks.map((ws) => {
           const inWeek = items.filter((w) => weekStart(w.date) === ws),
-            p = progress(inWeek, defaultGoals, ws === current);
+            p = progress(inWeek, goalsByWeek[ws] || defaultGoals, ws === current);
           return (
             <button
               className={`calendar-week ${statusClass(p.status)}`}
