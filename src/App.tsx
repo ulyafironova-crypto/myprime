@@ -437,9 +437,10 @@ function WorkoutForm({
     if (type === "run") {
       const p = parsePace(paceValue);
       const duration = parseDuration(minutes);
+      const distanceKm = Number(distance.replace(",", "."));
       if (
         !date ||
-        !(+distance > 0) ||
+        !(distanceKm > 0) ||
         p === null ||
         duration === null ||
         !(duration > 0) ||
@@ -456,7 +457,7 @@ function WorkoutForm({
         date,
         createdAt: now,
         updatedAt: now,
-        distanceKm: +distance.replace(",", "."),
+        distanceKm,
         paceSecondsPerKm: p,
         durationMinutes: duration,
         heartRate: +hr,
