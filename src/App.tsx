@@ -431,7 +431,8 @@ function WorkoutForm({
     [paceValue, setPaceValue] = useState(""),
     [minutes, setMinutes] = useState(""),
     [hr, setHr] = useState(""),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [repeatMessage, setRepeatMessage] = useState("");
   const submit = () => {
     const now = new Date().toISOString();
     if (type === "run") {
@@ -474,10 +475,20 @@ function WorkoutForm({
       });
   };
   const repeat = () => {
-    const latest = items
-      .filter((w) => w.type === "functional_strength" && w.strengthFocus === focus)
-      .sort((a, b) => b.date.localeCompare(a.date))[0];
-    if (latest) setNotes(latest.notes || "");
+    const isFunctional = (w: Workout) =>
+      (w.type === "functional_strength" || w.type === "strength") &&
+      Boolean(w.notes?.trim());
+    const newest = (workouts: Workout[]) =>
+      workouts.sort((a, b) => b.date.localeCompare(a.date))[0];
+    const latest =
+      newest(items.filter((w) => isFunctional(w) && w.strengthFocus === focus)) ||
+      newest(items.filter(isFunctional));
+    if (latest?.notes) {
+      setNotes(latest.notes);
+      setRepeatMessage(`Программа из тренировки ${displayDate(latest.date)} добавлена.`);
+    } else {
+      setRepeatMessage("Пока нет прошлой тренировки с сохранённой программой.");
+    }
   };
   return (
     <>
@@ -576,6 +587,7 @@ function WorkoutForm({
             <button className="secondary" onClick={repeat}>
               Повторить прошлую тренировку
             </button>
+            {repeatMessage && <p className="repeat-message">{repeatMessage}</p>}
           </>
         )}{" "}
         {type !== "run" && (
