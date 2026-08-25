@@ -11,6 +11,13 @@ export const addDays = (date: string, n: number) => {
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
 };
+export const shiftMonth = (month: string, offset: number) => {
+  const [year, monthNumber] = month.slice(0, 7).split("-").map(Number);
+  const absoluteMonth = year * 12 + monthNumber - 1 + offset;
+  const nextYear = Math.floor(absoluteMonth / 12);
+  const nextMonth = (absoluteMonth % 12) + 1;
+  return `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+};
 export const parsePace = (value: string) => {
   const m = value.trim().match(/^(\d{1,2})[:.,](\d{2})$/);
   if (!m || +m[2] > 59) return null;
