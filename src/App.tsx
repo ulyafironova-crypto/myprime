@@ -9,6 +9,7 @@ import {
   Footprints,
   Heart,
   Pencil,
+  PersonStanding,
   Plus,
   Settings,
   Trash2,
@@ -54,7 +55,7 @@ const Icon = ({ type }: { type: WorkoutType }) =>
 const focusLabel = (focus?: StrengthFocus) =>
   focus === "upper" ? "Верх" : focus === "lower" ? "Низ" : "Всё тело";
 const FocusIcon = ({ focus }: { focus?: StrengthFocus }) =>
-  focus === "upper" ? <BicepsFlexed /> : focus === "lower" ? <Footprints /> : <Dumbbell />;
+  focus === "upper" ? <BicepsFlexed /> : focus === "lower" ? <PersonStanding /> : <Dumbbell />;
 const newId = () => crypto.randomUUID();
 export default function App() {
   const [items, setItems] = useState<Workout[]>([]);
