@@ -251,13 +251,16 @@ function CalendarPage({
             >
               {Array.from({ length: 7 }, (_, i) => {
                 const date = addDays(ws, i),
-                  d = new Date(`${date}T12:00:00`);
+                  d = new Date(`${date}T12:00:00`),
+                  hasWorkout = items.some((workout) => workout.date === date);
                 return (
                   <span
                     className={`${date === today() ? "today" : ""} ${d.getMonth() !== first.getMonth() ? "muted" : ""}`}
                     key={date}
+                    aria-label={hasWorkout ? `${displayDate(date)}: есть тренировка` : displayDate(date)}
                   >
                     {d.getDate()}
+                    {hasWorkout && <i className="workout-dot" aria-hidden="true" />}
                   </span>
                 );
               })}
