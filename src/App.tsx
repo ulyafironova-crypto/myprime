@@ -9,7 +9,6 @@ import {
   Footprints,
   Heart,
   Pencil,
-  PersonStanding,
   Plus,
   Settings,
   Trash2,
@@ -54,8 +53,23 @@ const Icon = ({ type }: { type: WorkoutType }) =>
   );
 const focusLabel = (focus?: StrengthFocus) =>
   focus === "upper" ? "Верх" : focus === "lower" ? "Низ" : "Всё тело";
+const LegIcon = () => (
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 3c2.8.2 5 1.8 5.2 4.4l.3 3.7c.1 1.5-.3 3-1.3 4.1l-2.3 2.6 1.7 2.1c.6.7.1 1.8-.8 1.8H6.5" />
+    <path d="M9 3 7.4 8.2c-.5 1.8-.2 3.7.9 5.1l2.6 3.4" />
+    <path d="M6.5 21H4" />
+  </svg>
+);
 const FocusIcon = ({ focus }: { focus?: StrengthFocus }) =>
-  focus === "upper" ? <BicepsFlexed /> : focus === "lower" ? <PersonStanding /> : <Dumbbell />;
+  focus === "upper" ? <BicepsFlexed /> : focus === "lower" ? <LegIcon /> : <Dumbbell />;
 const newId = () => crypto.randomUUID();
 export default function App() {
   const [items, setItems] = useState<Workout[]>([]);
@@ -884,11 +898,3 @@ const statusClass = (s: string) =>
   s === "Идеальная"
     ? "ideal"
     : s === "Хорошая"
-      ? "good"
-      : s === "Средняя"
-        ? "medium"
-        : s === "Слабая"
-          ? "low"
-          : s === "В процессе"
-            ? "progress"
-            : "empty";
