@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  BicepsFlexed,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -50,6 +51,10 @@ const Icon = ({ type }: { type: WorkoutType }) =>
   ) : (
     <Zap />
   );
+const focusLabel = (focus?: StrengthFocus) =>
+  focus === "upper" ? "Верх" : focus === "lower" ? "Низ" : "Всё тело";
+const FocusIcon = ({ focus }: { focus?: StrengthFocus }) =>
+  focus === "upper" ? <BicepsFlexed /> : focus === "lower" ? <Footprints /> : <Dumbbell />;
 const newId = () => crypto.randomUUID();
 export default function App() {
   const [items, setItems] = useState<Workout[]>([]);
@@ -404,9 +409,7 @@ function WeekPage({
                   {w.type === "run"
                     ? `${w.distanceKm} км · ${pace(w.paceSecondsPerKm)}/км`
                     : w.type === "strength"
-                      ? w.strengthFocus === "upper"
-                        ? "Верх"
-                        : "Низ"
+                      ? focusLabel(w.strengthFocus)
                       : w.notes || "Состоялась"}
                 </small>
               </div>
@@ -623,6 +626,12 @@ function WorkoutForm({
               >
                 Низ
               </button>
+              <button
+                className={focus === "full_body" ? "chosen" : ""}
+                onClick={() => setFocus("full_body")}
+              >
+                Всё тело
+              </button>
             </div>
             <button className="secondary" onClick={repeat}>
               Повторить прошлую тренировку
@@ -759,12 +768,7 @@ function FunctionalPage({
         <section className="functional-list" aria-label="Список тренировок">
           {workouts.map((workout) => {
             const isOpened = opened === workout.id;
-            const focus =
-              workout.strengthFocus === "upper"
-                ? "Верх"
-                : workout.strengthFocus === "lower"
-                  ? "Низ"
-                  : "Функционально-силовая";
+            const focus = focusLabel(workout.strengthFocus);
             return (
               <article
                 className={`functional-card ${isOpened ? "opened" : ""}`}
@@ -777,7 +781,7 @@ function FunctionalPage({
                   onClick={() => setOpened(isOpened ? null : workout.id)}
                 >
                 <span className="type-icon">
-                  <Dumbbell />
+                  <FocusIcon focus={workout.strengthFocus} />
                 </span>
                 <span className="functional-card-content">
                   <b>{displayDate(workout.date)}</b>
