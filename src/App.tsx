@@ -31,6 +31,7 @@ import {
   parsePace,
   progress,
   runningSummary,
+  shiftMonth,
   today,
   typeLabel,
   weekStart,
@@ -221,20 +222,14 @@ function CalendarPage({
       <section className="month-switch">
         <button
           aria-label="Предыдущий месяц"
-          onClick={() => setMonth(addDays(month, -1).slice(0, 7) + "-01")}
+          onClick={() => setMonth(shiftMonth(month, -1))}
         >
           <ChevronLeft />
         </button>
         <h2>{monthName(month)}</h2>
         <button
           aria-label="Следующий месяц"
-          onClick={() =>
-            setMonth(
-              new Date(first.getFullYear(), first.getMonth() + 1, 1)
-                .toISOString()
-                .slice(0, 10),
-            )
-          }
+          onClick={() => setMonth(shiftMonth(month, 1))}
         >
           <ChevronRight />
         </button>
