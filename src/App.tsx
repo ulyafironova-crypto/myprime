@@ -7,6 +7,7 @@ import {
   Dumbbell,
   Footprints,
   Heart,
+  Pencil,
   Plus,
   Settings,
   Trash2,
@@ -56,6 +57,7 @@ export default function App() {
   const [month, setMonth] = useState(today().slice(0, 7) + "-01");
   const [selectedWeek, setSelectedWeek] = useState(weekStart(today()));
   const [toast, setToast] = useState("");
+  const [editing, setEditing] = useState<Workout | null>(null);
   const reload = async () => setItems(await getWorkouts());
   useEffect(() => {
     bootstrap().then(reload);
@@ -64,6 +66,21 @@ export default function App() {
   const notify = (s: string) => {
     setToast(s);
     setTimeout(() => setToast(""), 2500);
+  };
+  const openAdd = () => {
+    setEditing(null);
+    go("add");
+  };
+  const openEdit = (workout: Workout) => {
+    setEditing(workout);
+    go("add");
+  };
+  const removeWorkout = async (workout: Workout) => {
+    if (confirm("Удалить тренировку? Это действие нельзя отменить")) {
+      await deleteWorkout(workout.id);
+      await reload();
+      notify("Тренировка удалена");
+    }
   };
   return (
     <main>
@@ -77,7 +94,7 @@ export default function App() {
               setSelectedWeek(w);
               go("week");
             }}
-            onAdd={() => go("add")}
+            onAdd={openAdd}
           />
         )}{" "}
         {page === "week" && (
@@ -85,7 +102,7 @@ export default function App() {
             items={items}
             start={selectedWeek}
             onBack={() => go("calendar")}
-            onAdd={() => go("add")}
+            onAdd={openAdd}
             reload={reload}
             notify={notify}
           />
@@ -93,23 +110,26 @@ export default function App() {
         {page === "add" && (
           <WorkoutForm
             items={items}
-            onBack={() => go("calendar")}
+            initialWorkout={editing}
+            onBack={() => {
+              setEditing(null);
+              go("calendar");
+            }}
             onSave={async (w) => {
               await saveWorkout(w);
               await reload();
-              notify(
-                w.id.startsWith("notes")
-                  ? "Импорт обновлён"
-                  : "Тренировка сохранена",
-              );
+              notify(editing ? "Тренировка обновлена" : "Тренировка сохранена");
+              setEditing(null);
               go("calendar");
             }}
           />
         )}
         {page === "runs" && (
-          <RunsPage items={items} onEdit={(w) => go("add")} />
+          <RunsPage items={items} onEdit={openEdit} onDelete={removeWorkout} />
         )}{" "}
-        {page === "functional" && <FunctionalPage items={items} />}
+        {page === "functional" && (
+          <FunctionalPage items={items} onEdit={openEdit} onDelete={removeWorkout} />
+        )}
         {page === "settings" && <SettingsPage onSave={notify} />}{" "}
         {page !== "week" && <Nav page={page} go={go} />}{" "}
         {toast && (
@@ -416,21 +436,29 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 function WorkoutForm({
   items,
+  initialWorkout,
   onBack,
   onSave,
 }: {
   items: Workout[];
+  initialWorkout: Workout | null;
   onBack: () => void;
   onSave: (w: Workout) => void;
 }) {
-  const [type, setType] = useState<WorkoutType>("run"),
-    [date, setDate] = useState(today()),
-    [focus, setFocus] = useState<StrengthFocus>("upper"),
-    [notes, setNotes] = useState(""),
-    [distance, setDistance] = useState(""),
-    [paceValue, setPaceValue] = useState(""),
-    [minutes, setMinutes] = useState(""),
-    [hr, setHr] = useState(""),
+  const [type, setType] = useState<WorkoutType>(
+      initialWorkout?.type === "run" ? "run" : "functional_strength",
+    ),
+    [date, setDate] = useState(initialWorkout?.date || today()),
+    [focus, setFocus] = useState<StrengthFocus>(initialWorkout?.strengthFocus || "upper"),
+    [notes, setNotes] = useState(initialWorkout?.notes || ""),
+    [distance, setDistance] = useState(
+      initialWorkout?.distanceKm?.toString().replace(".", ",") || "",
+    ),
+    [paceValue, setPaceValue] = useState(pace(initialWorkout?.paceSecondsPerKm)),
+    [minutes, setMinutes] = useState(
+      initialWorkout?.durationMinutes?.toString() || "",
+    ),
+    [hr, setHr] = useState(initialWorkout?.heartRate?.toString() || ""),
     [error, setError] = useState(""),
     [repeatMessage, setRepeatMessage] = useState("");
   const submit = () => {
@@ -453,10 +481,10 @@ function WorkoutForm({
         return;
       }
       onSave({
-        id: newId(),
+        id: initialWorkout?.id || newId(),
         type,
         date,
-        createdAt: now,
+        createdAt: initialWorkout?.createdAt || now,
         updatedAt: now,
         distanceKm,
         paceSecondsPerKm: p,
@@ -465,10 +493,10 @@ function WorkoutForm({
       });
     } else
       onSave({
-        id: newId(),
+        id: initialWorkout?.id || newId(),
         type,
         date,
-        createdAt: now,
+        createdAt: initialWorkout?.createdAt || now,
         updatedAt: now,
         strengthFocus: type === "functional_strength" ? focus : undefined,
         notes: notes.trim() || undefined,
@@ -496,7 +524,7 @@ function WorkoutForm({
         <button className="round" onClick={onBack}>
           <ChevronLeft />
         </button>
-        <h1>Новая тренировка</h1>
+        <h1>{initialWorkout ? "Редактировать тренировку" : "Новая тренировка"}</h1>
       </header>
       <section className="card">
         <h2>Тип тренировки</h2>
@@ -616,9 +644,12 @@ function WorkoutForm({
 }
 function RunsPage({
   items,
+  onEdit,
+  onDelete,
 }: {
   items: Workout[];
   onEdit: (w: Workout) => void;
+  onDelete: (w: Workout) => void;
 }) {
   const runs = items.filter((w) => w.type === "run"),
     s = runningSummary(
@@ -645,6 +676,7 @@ function RunsPage({
       <h2 className="section-title">Все пробежки</h2>
       {runs.map((w) => (
         <article className="run-card" key={w.id}>
+          <WorkoutActions workout={w} onEdit={onEdit} onDelete={onDelete} />
           <small>{displayDate(w.date)}</small>
           <b>
             {w.distanceKm?.toFixed(2).replace(".", ",")} <small>км</small>
@@ -668,7 +700,39 @@ function RunsPage({
     </>
   );
 }
-function FunctionalPage({ items }: { items: Workout[] }) {
+function WorkoutActions({
+  workout,
+  onEdit,
+  onDelete,
+}: {
+  workout: Workout;
+  onEdit: (workout: Workout) => void;
+  onDelete: (workout: Workout) => void;
+}) {
+  return (
+    <span className="workout-actions" aria-label="Действия с тренировкой">
+      <button aria-label="Редактировать тренировку" onClick={() => onEdit(workout)}>
+        <Pencil />
+      </button>
+      <button
+        className="delete-action"
+        aria-label="Удалить тренировку"
+        onClick={() => onDelete(workout)}
+      >
+        <Trash2 />
+      </button>
+    </span>
+  );
+}
+function FunctionalPage({
+  items,
+  onEdit,
+  onDelete,
+}: {
+  items: Workout[];
+  onEdit: (workout: Workout) => void;
+  onDelete: (workout: Workout) => void;
+}) {
   const [opened, setOpened] = useState<string | null>(null);
   const workouts = items.filter(
     (w) => w.type === "functional_strength" || w.type === "strength",
@@ -690,12 +754,16 @@ function FunctionalPage({ items }: { items: Workout[] }) {
                   ? "Низ"
                   : "Функционально-силовая";
             return (
-              <button
+              <article
                 className={`functional-card ${isOpened ? "opened" : ""}`}
                 key={workout.id}
-                aria-expanded={isOpened}
-                onClick={() => setOpened(isOpened ? null : workout.id)}
               >
+                <WorkoutActions workout={workout} onEdit={onEdit} onDelete={onDelete} />
+                <button
+                  className="functional-card-main"
+                  aria-expanded={isOpened}
+                  onClick={() => setOpened(isOpened ? null : workout.id)}
+                >
                 <span className="type-icon">
                   <Dumbbell />
                 </span>
@@ -710,7 +778,8 @@ function FunctionalPage({ items }: { items: Workout[] }) {
                     </small>
                   )}
                 </span>
-              </button>
+                </button>
+              </article>
             );
           })}
         </section>
