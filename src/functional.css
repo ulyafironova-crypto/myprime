@@ -28,3 +28,9 @@
 .functional-preview { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .functional-card.opened .functional-preview { display: none; }
 .functional-program { white-space: pre-wrap; color: var(--text); }
+
+.repeat-message {
+  margin: -6px 0 0;
+  color: var(--secondary);
+  font-size: 14px;
+}
