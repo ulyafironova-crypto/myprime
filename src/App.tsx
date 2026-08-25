@@ -25,6 +25,7 @@ import {
   displayDate,
   monthName,
   pace,
+  parseDuration,
   parsePace,
   progress,
   runningSummary,
@@ -435,15 +436,17 @@ function WorkoutForm({
     const now = new Date().toISOString();
     if (type === "run") {
       const p = parsePace(paceValue);
+      const duration = parseDuration(minutes);
       if (
         !date ||
         !(+distance > 0) ||
         p === null ||
-        !(+minutes > 0) ||
+        duration === null ||
+        !(duration > 0) ||
         !(+hr > 0)
       ) {
         setError(
-          "Заполните дату, километраж, темп мм:сс, длительность и пульс.",
+          "Заполните дату, километраж, темп мм:сс, длительность (минуты или ч:мм) и пульс.",
         );
         return;
       }
@@ -455,7 +458,7 @@ function WorkoutForm({
         updatedAt: now,
         distanceKm: +distance.replace(",", "."),
         paceSecondsPerKm: p,
-        durationMinutes: +minutes,
+        durationMinutes: duration,
         heartRate: +hr,
       });
     } else
@@ -523,19 +526,23 @@ function WorkoutForm({
             <label>
               Темп, мм:сс / км
               <input
-                inputMode="numeric"
+                inputMode="text"
+                autoCapitalize="none"
+                autoCorrect="off"
                 value={paceValue}
                 onChange={(e) => setPaceValue(e.target.value)}
                 placeholder="6:10"
               />
             </label>
             <label>
-              Длительность, мин
+              Длительность, мин или ч:мм
               <input
-                inputMode="numeric"
+                inputMode="text"
+                autoCapitalize="none"
+                autoCorrect="off"
                 value={minutes}
                 onChange={(e) => setMinutes(e.target.value)}
-                placeholder="32"
+                placeholder="32 или 1:20"
               />
             </label>
             <label>
