@@ -4,15 +4,26 @@
 }
 
 .functional-card {
+  position: relative;
+  width: 100%;
+  min-height: 88px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.functional-card-main {
   width: 100%;
   min-height: 88px;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: var(--surface);
+  padding: 16px 106px 16px 16px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
   text-align: left;
 }
 
@@ -33,4 +44,40 @@
   margin: -6px 0 0;
   color: var(--secondary);
   font-size: 14px;
+}
+
+.run-card,
+.functional-card {
+  position: relative;
+}
+
+.run-card {
+  padding-right: 106px;
+}
+
+.workout-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.workout-actions button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.workout-actions svg {
+  width: 19px;
+}
+
+.workout-actions .delete-action {
+  color: #b53d35;
 }
