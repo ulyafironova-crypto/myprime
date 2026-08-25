@@ -228,12 +228,10 @@ function CurrentWeek({
   items: Workout[];
   onAdd: () => void;
 }) {
-  const start = weekStart(today()),
-    p = progress(
-      items.filter((w) => weekStart(w.date) === start),
-      defaultGoals,
-      true,
-    );
+  const start = weekStart(today());
+  const [goals, setGoals] = useState(defaultGoals);
+  useEffect(() => { getGoal(start).then((goal) => setGoals(goal || defaultGoals)); }, [start]);
+  const p = progress(items.filter((w) => weekStart(w.date) === start), goals, true);
   return (
     <section className="card current">
       <div>
@@ -246,13 +244,13 @@ function CurrentWeek({
       <Progress
         label="Бег"
         value={p.counts.run}
-        goal={defaultGoals.run}
+        goal={goals.run}
         icon={<Footprints />}
       />
       <Progress
         label="Функционально-силовые"
         value={p.counts.functionalStrength}
-        goal={defaultGoals.functionalStrength}
+        goal={goals.functionalStrength}
         icon={<Zap />}
       />
       <button className="primary" onClick={onAdd}>
