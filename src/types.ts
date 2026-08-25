@@ -1,5 +1,5 @@
 export type WorkoutType = "run" | "strength" | "functional_strength";
-export type StrengthFocus = "upper" | "lower";
+export type StrengthFocus = "upper" | "lower" | "full_body";
 export type Workout = {
   id: string;
   type: WorkoutType;
