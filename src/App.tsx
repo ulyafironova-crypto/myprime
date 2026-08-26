@@ -217,7 +217,6 @@ function CalendarPage({
     <>
       <header>
         <h1>Календарь</h1>
-        <button className="round" aria-label="Добавить тренировку" onClick={onAdd}><Plus /></button>
       </header>
       <section className="month-switch">
         <button
